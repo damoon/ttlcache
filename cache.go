@@ -7,17 +7,17 @@ import (
 
 // Cache is a synchronised map of items that auto-expire once stale
 type Cache struct {
-	mutex     sync.RWMutex
-	ttl       time.Duration
-	items     map[K]*Item
-	zeroValue V
+	mutex sync.RWMutex
+	ttl   time.Duration
+	items map[K]*Item
 }
 
 // K is the type of the keys
 type K interface{}
 
 // V is the type of the values
-type V interface{}
+type V interface {
+}
 
 // Set is a thread-safe way to add new items to the map
 func (cache *Cache) Set(key K, data V) {
@@ -34,7 +34,7 @@ func (cache *Cache) Get(key K) (data V, found bool) {
 	cache.mutex.Lock()
 	item, exists := cache.items[key]
 	if !exists || item.expired() {
-		data = cache.zeroValue
+		data = nil
 		found = false
 	} else {
 		item.touch(cache.ttl)
@@ -79,11 +79,10 @@ func (cache *Cache) StartCleanupTimer(interval time.Duration) *time.Ticker {
 }
 
 // NewCache is a helper to create instance of the Cache struct
-func NewCache(duration time.Duration, z V) *Cache {
+func NewCache(duration time.Duration) *Cache {
 	cache := &Cache{
-		ttl:       duration,
-		items:     map[K]*Item{},
-		zeroValue: z,
+		ttl:   duration,
+		items: map[K]*Item{},
 	}
 	return cache
 }

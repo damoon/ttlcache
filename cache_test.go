@@ -8,10 +8,10 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	cache := NewCache(time.Second, "")
+	cache := NewCache(time.Second)
 
 	data, exists := cache.Get("hello")
-	if exists || data != "" {
+	if exists {
 		t.Errorf("Expected empty cache to return no data")
 	}
 
@@ -26,10 +26,10 @@ func TestGet(t *testing.T) {
 }
 
 func TestInt(t *testing.T) {
-	cache := NewCache(time.Second, 0)
+	cache := NewCache(time.Second)
 
 	data, exists := cache.Get(1)
-	if exists || data != 0 {
+	if exists {
 		t.Errorf("Expected empty cache to return no data")
 	}
 
@@ -44,7 +44,7 @@ func TestInt(t *testing.T) {
 }
 
 func TestExpiration(t *testing.T) {
-	cache := NewCache(time.Second, "")
+	cache := NewCache(time.Second)
 
 	cache.Set("x", "1")
 	cache.Set("y", "z")
