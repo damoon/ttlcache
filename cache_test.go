@@ -10,13 +10,13 @@ import (
 func TestGet(t *testing.T) {
 	cache := NewCache(time.Second)
 
-	data, exists := cache.Get("hello")
+	data, exists := cache.GetUnsafe("hello")
 	if exists {
 		t.Errorf("Expected empty cache to return no data")
 	}
 
-	cache.Set("hello", "world")
-	data, exists = cache.Get("hello")
+	cache.SetUnsafe("hello", "world")
+	data, exists = cache.GetUnsafe("hello")
 	if !exists {
 		t.Errorf("Expected cache to return data for `hello`")
 	}
@@ -28,13 +28,13 @@ func TestGet(t *testing.T) {
 func TestInt(t *testing.T) {
 	cache := NewCache(time.Second)
 
-	data, exists := cache.Get(1)
+	data, exists := cache.GetUnsafe(1)
 	if exists {
 		t.Errorf("Expected empty cache to return no data")
 	}
 
-	cache.Set(1, 2)
-	data, exists = cache.Get(1)
+	cache.SetUnsafe(1, 2)
+	data, exists = cache.GetUnsafe(1)
 	if !exists {
 		t.Errorf("Expected cache to return data for `hello`")
 	}
@@ -46,19 +46,19 @@ func TestInt(t *testing.T) {
 func TestExpiration(t *testing.T) {
 	cache := NewCache(time.Second)
 
-	cache.Set("x", "1")
-	cache.Set("y", "z")
-	cache.Set("z", "3")
+	cache.SetUnsafe("x", "1")
+	cache.SetUnsafe("y", "z")
+	cache.SetUnsafe("z", "3")
 
-	item, exists := cache.Get("x")
+	item, exists := cache.GetUnsafe("x")
 	if !exists || item != "1" {
 		t.Errorf("Expected `x` to not have expired after 500ms")
 	}
-	_, exists = cache.Get("y")
+	_, exists = cache.GetUnsafe("y")
 	if !exists {
 		t.Errorf("Expected `y` to not have expired")
 	}
-	_, exists = cache.Get("z")
+	_, exists = cache.GetUnsafe("z")
 	if !exists {
 		t.Errorf("Expected `z` to not have expired")
 	}
@@ -71,22 +71,22 @@ func TestExpiration(t *testing.T) {
 	defer timer.Stop()
 
 	<-time.After(500 * time.Millisecond)
-	item, exists = cache.Get("x")
+	item, exists = cache.GetUnsafe("x")
 	if !exists || item != "1" {
 		t.Errorf("Expected `x` to not have expired after 500ms")
 	}
 
 	<-time.After(600 * time.Millisecond)
 
-	item, exists = cache.Get("x")
+	item, exists = cache.GetUnsafe("x")
 	if !exists || item != "1" {
 		t.Errorf("Expected `x` to not have expired")
 	}
-	_, exists = cache.Get("y")
+	_, exists = cache.GetUnsafe("y")
 	if exists {
 		t.Errorf("Expected `y` to have expired")
 	}
-	_, exists = cache.Get("z")
+	_, exists = cache.GetUnsafe("z")
 	if exists {
 		t.Errorf("Expected `z` to have expired")
 	}
@@ -96,7 +96,7 @@ func TestExpiration(t *testing.T) {
 	}
 
 	<-time.After(2 * time.Second)
-	_, exists = cache.Get("x")
+	_, exists = cache.GetUnsafe("x")
 	if exists {
 		t.Errorf("Expected `x` to have expired")
 	}

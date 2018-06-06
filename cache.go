@@ -19,8 +19,17 @@ type K interface{}
 type V interface {
 }
 
-// Set is a thread-safe way to add new items to the map
-func (cache *Cache) Set(key K, data V) {
+// NewCache is a helper to create instance of the Cache struct
+func NewCache(duration time.Duration) *Cache {
+	cache := &Cache{
+		ttl:   duration,
+		items: map[K]*Item{},
+	}
+	return cache
+}
+
+// SetUnsafe is a thread-safe way to add new items to the map
+func (cache *Cache) SetUnsafe(key K, data V) {
 	cache.mutex.Lock()
 	item := &Item{data: data}
 	item.touch(cache.ttl)
@@ -28,9 +37,9 @@ func (cache *Cache) Set(key K, data V) {
 	cache.mutex.Unlock()
 }
 
-// Get is a thread-safe way to lookup items
+// GetUnsafe is a thread-safe way to lookup items
 // Every lookup, also touches the item, hence extending it's life
-func (cache *Cache) Get(key K) (data V, found bool) {
+func (cache *Cache) GetUnsafe(key K) (data V, found bool) {
 	cache.mutex.Lock()
 	item, exists := cache.items[key]
 	if !exists || item.expired() {
@@ -76,13 +85,4 @@ func (cache *Cache) StartCleanupTimer(interval time.Duration) *time.Ticker {
 		}
 	})()
 	return ticker
-}
-
-// NewCache is a helper to create instance of the Cache struct
-func NewCache(duration time.Duration) *Cache {
-	cache := &Cache{
-		ttl:   duration,
-		items: map[K]*Item{},
-	}
-	return cache
 }
