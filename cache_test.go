@@ -7,8 +7,9 @@ import (
 
 func TestGet(t *testing.T) {
 	cache := &Cache{
-		ttl:   time.Second,
-		items: map[string]*Item{},
+		ttl:       time.Second,
+		items:     map[K]*Item{},
+		zeroValue: "",
 	}
 
 	data, exists := cache.Get("hello")
@@ -26,10 +27,33 @@ func TestGet(t *testing.T) {
 	}
 }
 
+func TestInt(t *testing.T) {
+	cache := &Cache{
+		ttl:       time.Second,
+		items:     map[K]*Item{},
+		zeroValue: 0,
+	}
+
+	data, exists := cache.Get(1)
+	if exists || data != 0 {
+		t.Errorf("Expected empty cache to return no data")
+	}
+
+	cache.Set(1, 2)
+	data, exists = cache.Get(1)
+	if !exists {
+		t.Errorf("Expected cache to return data for `hello`")
+	}
+	if data != 2 {
+		t.Errorf("Expected cache to return `world` for `hello`")
+	}
+}
+
 func TestExpiration(t *testing.T) {
 	cache := &Cache{
-		ttl:   time.Second,
-		items: map[string]*Item{},
+		ttl:       time.Second,
+		items:     map[K]*Item{},
+		zeroValue: "",
 	}
 
 	cache.Set("x", "1")
